@@ -1,0 +1,22 @@
+# Environment
+.env
+
+# Binary
+api
+worker
+
+# Go
+*.exe
+*.out
+*.test
+vendor/
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TXT
+*.txt
