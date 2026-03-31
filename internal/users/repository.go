@@ -1,5 +1,9 @@
 package users
 
+/* 
+repository.go is responsible for managing database operations, implementing necessary operations, and interacting with the database.
+*/
+
 import (
 	"github.com/jackc/pgx/v5"
 	"context"

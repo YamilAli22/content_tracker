@@ -2,8 +2,8 @@
 .env
 
 # Binary
-api
-worker
+cmd/api/api
+cmd/worker/worker
 
 # Go
 *.exe

@@ -1,5 +1,9 @@
 package users
 
+/*
+handler.go for handles the http requests and serving the responses, interacting with the database if necessary
+*/
+
 import (
 	"encoding/json"
 	"net/http"
