@@ -38,7 +38,7 @@ func newServer(db *pgx.Conn) *Server {
 
 	usersHandler := &users.Handler{Conn: server.DB}
 	server.Router.Post("/users", usersHandler.HandleCreateUser)
-	server.Router.Post("/users/logi/login", usersHandler.HandleUserLogin)
+	server.Router.Post("/users/login", usersHandler.HandleUserLogin)
 	return server
 }
 
@@ -60,5 +60,5 @@ func main() {
 	server := newServer(conn)
 
 	fmt.Println("server running on port", PORT)
-	http.ListenAndServe(":"+PORT, server.Router)
+	http.ListenAndServe(PORT, server.Router)
 }

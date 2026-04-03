@@ -4,6 +4,7 @@
 # Binary
 cmd/api/api
 cmd/worker/worker
+home/yamil/content_tracker/api
 
 # Go
 *.exe

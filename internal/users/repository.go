@@ -6,13 +6,15 @@ repository.go is responsible for managing database operations, implementing nece
 
 import (
 	"github.com/jackc/pgx/v5"
+	"github.com/google/uuid"
 	"context"
 )
 
 func CreateUser(ctx context.Context, conn *pgx.Conn, user *UserRequestBody) (UserResponse, error) {
-	var id int
-	query := `INSERT INTO users (email, hash) VALUES ($1, $2) RETURNING id`
-	err := conn.QueryRow(ctx, query, user.Email, user.Password).Scan(&id)
+	var id uuid.UUID
+	var email string
+	query := `INSERT INTO users (email, hash) VALUES ($1, $2) RETURNING id, email`
+	err := conn.QueryRow(ctx, query, user.Email, user.Password).Scan(&id, &email)
 	if err != nil {
 		response := UserResponse{
 			Id: id,
@@ -21,6 +23,7 @@ func CreateUser(ctx context.Context, conn *pgx.Conn, user *UserRequestBody) (Use
 	}
 	response := UserResponse{
 		Id: id,
+		Email: email,
 	}
 	return response, err
 }
