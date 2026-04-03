@@ -38,7 +38,7 @@ func newServer(db *pgx.Conn) *Server {
 
 	usersHandler := &users.Handler{Conn: server.DB}
 	server.Router.Post("/users", usersHandler.HandleCreateUser)
-	
+	server.Router.Post("/users/logi/login", usersHandler.HandleUserLogin)
 	return server
 }
 
