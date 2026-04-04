@@ -39,6 +39,9 @@ func newServer(db *pgx.Conn) *Server {
 	usersHandler := &users.Handler{Conn: server.DB}
 	server.Router.Post("/users", usersHandler.HandleCreateUser)
 	server.Router.Post("/users/login", usersHandler.HandleUserLogin)
+	server.Router.Get("/users", usersHandler.HandleGetUsers)
+	server.Router.Get("/user/search", usersHandler.HandleGetUserByEmail) // now only searchs by email, but it can be generalized and add more filters
+	server.Router.Get("/user/{id}", usersHandler.HandleGetUserByID)
 	return server
 }
 

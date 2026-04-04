@@ -40,8 +40,8 @@ func GetUsers(ctx context.Context, conn *pgx.Conn) ([]*UserResponse, error) {
     return users, err
 }
 
-// GetUserByEmail returns User (internal use, contains hash)
-func GetUserByEmail(ctx context.Context, conn *pgx.Conn, email string) (User, error) {
+// GetUserByEmail returns User (internal use, contains hash, this function is used by the login handler)
+func GetUserByEmailWithHash(ctx context.Context, conn *pgx.Conn, email string) (User, error) {
     var user User
     query := `SELECT id, email, hash FROM users WHERE email = $1`
     err := conn.QueryRow(ctx, query, email).Scan(&user.Id, &user.Email, &user.Hash)
@@ -50,5 +50,27 @@ func GetUserByEmail(ctx context.Context, conn *pgx.Conn, email string) (User, er
 	}
     return user, err
 }
+
+func GetUserByEmail(ctx context.Context, conn *pgx.Conn, email string) (UserResponse, error) {
+    var user UserResponse
+    query := `SELECT id, email FROM users WHERE email = $1`
+    err := conn.QueryRow(ctx, query, email).Scan(&user.Id, &user.Email)
+	if err != nil {
+		return UserResponse{}, err
+	}
+    return user, err
+}
+
+
+func GetUserById(ctx context.Context, conn *pgx.Conn, id string) (UserResponse, error) {
+	var user UserResponse
+	query := `SELECT id, email FROM users WHERE id = $1`
+	err := conn.QueryRow(ctx, query, id).Scan(&user.Id, &user.Email)
+	if err != nil {
+ 		return UserResponse{}, err
+	}
+	return user, err
+}
+
 
 
