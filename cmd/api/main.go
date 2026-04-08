@@ -8,10 +8,12 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/joho/godotenv"
 	"github.com/jackc/pgx/v5"
+	"github.com/joho/godotenv"
 
 	"github.com/YamilAli22/content_tracker/internal/db"
+	"github.com/YamilAli22/content_tracker/internal/games"
+	"github.com/YamilAli22/content_tracker/internal/middleware"
 	"github.com/YamilAli22/content_tracker/internal/users"
 )
 
@@ -42,6 +44,13 @@ func newServer(db *pgx.Conn) *Server {
 	server.Router.Get("/users", usersHandler.HandleGetUsers)
 	server.Router.Get("/user/search", usersHandler.HandleGetUserByEmail) // now only searchs by email, but it can be generalized and add more filters
 	server.Router.Get("/user/{id}", usersHandler.HandleGetUserByID)
+	// GAMES ROUTES
+	gamesHandler := &games.DBHandler{Conn: server.DB}
+	server.Router.Group(func(r chi.Router) {
+		r.Use(middleware.JWTMiddleware)
+		r.Post("/games", gamesHandler.HandleAddGame)
+		r.Get("/games/search", games.HandleGameRequest)
+	})
 	return server
 }
 
