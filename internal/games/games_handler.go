@@ -2,8 +2,9 @@ package games
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
-    "log"
+
 	"github.com/jackc/pgx/v5"
 )
 
@@ -40,7 +41,7 @@ func (h *DBHandler) HandleAddGame(w http.ResponseWriter, r *http.Request) {
     	return
 	}
 
-	gameDetails, err := GameDetailsLogic(steamResp, gameReq.SteamAppID)
+	gameDetails, err := GameDetailsLogic(steamResp, gameReq.SteamAppID, gameReq.TargetPrice)
 	if err != nil {
  	   	log.Printf("CallSteamEndpointByID: %v", err)
     	w.WriteHeader(http.StatusInternalServerError)
@@ -63,8 +64,9 @@ func (h *DBHandler) HandleAddGame(w http.ResponseWriter, r *http.Request) {
 		TargetPrice: gameDetails.TargetPrice,
 		IsFree: gameDetails.IsFree,
 	}
-
+	log.Println("holi")
 	DBResponse, err := StoreGameInDB(r.Context(), h.Conn, inputGame)  
+	log.Printf("DB RESPONSE: %v\n Error: %v", DBResponse, err)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Somethig Went Wrong In The Server"))

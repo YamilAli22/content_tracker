@@ -9,12 +9,13 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
-func CallSteamSearch(ctx context.Context, game string) (interface{}, error) {
+func CallSteamSearch(ctx context.Context, game string) (SteamSearchResponse, error) {
+	var searchResp SteamSearchResponse
 	baseURL := "https://store.steampowered.com/api/storesearch/"
 	params := url.Values{}
 	params.Add("term", game)
@@ -24,20 +25,23 @@ func CallSteamSearch(ctx context.Context, game string) (interface{}, error) {
 	fullURL := baseURL + "?" + params.Encode()
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
 	if err != nil {
-		return "", fmt.Errorf("creating request: %w", err)
+		return SteamSearchResponse{}, fmt.Errorf("creating request: %w", err)
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("calling steam API: %w", err)
+		return SteamSearchResponse{}, fmt.Errorf("calling steam API: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("steam API returned status %d", resp.StatusCode)
+		return SteamSearchResponse{}, fmt.Errorf("steam API returned status %d", resp.StatusCode)
 	}
-	return resp.Body, nil
 
+	if err := json.NewDecoder(resp.Body).Decode(&searchResp); err != nil {
+		return SteamSearchResponse{}, fmt.Errorf("error during decode: %v", err)
+	}
+	return searchResp, nil
 }
 
 func CallSteamSearchByID(ctx context.Context, steamAppID int) (SteamAppDetails, error) {
@@ -70,7 +74,7 @@ func CallSteamSearchByID(ctx context.Context, steamAppID int) (SteamAppDetails, 
 	return steamResp[strconv.Itoa(steamAppID)], nil
 }
 
-func GameDetailsLogic(steamResp SteamAppDetails, steamAppID int) (GameResponse, error) {
+func GameDetailsLogic(steamResp SteamAppDetails, steamAppID int, targetPrice float64) (GameResponse, error) {
 	if steamResp.Success == false || steamResp.Data == nil {
 		return GameResponse{}, errors.New("Steam data is nil")
 	} 
@@ -80,11 +84,10 @@ func GameDetailsLogic(steamResp SteamAppDetails, steamAppID int) (GameResponse, 
  		currentPrice = float64(steamResp.Data.PriceOverview.Final) / 100
 	}
 	
-	targetPrice := 0.0
-	if !steamResp.Data.IsFree && steamResp.Data.PriceOverview != nil {
+	if !steamResp.Data.IsFree && steamResp.Data.PriceOverview != nil && targetPrice == 0.0 {
 		targetPrice = float64(steamResp.Data.PriceOverview.Final) / 100
 	}
-	
+
 	return GameResponse{
 		SteamAppID: steamAppID,
 		Name: steamResp.Data.Name,
